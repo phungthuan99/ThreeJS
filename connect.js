@@ -8,7 +8,15 @@ function main() {
     let gltf;
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({ canvas });
-
+    canvas.addEventListener('mousedown', () => {
+        canvas.style.cursor = 'grabbing';
+    });
+    canvas.addEventListener('mouseup', () => {
+        canvas.style.cursor = 'grab';
+    });
+    canvas.addEventListener('mouseover', () => {
+        canvas.style.cursor = 'grab';
+    })
     const camera = new THREE.PerspectiveCamera(
         75,
         window.innerWidth / window.innerHeight,
@@ -23,33 +31,41 @@ function main() {
     controls.update();
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#f4f4f4');
-
+    scene.background = new THREE.Color('#F6F6F6');
+    const manager = new THREE.LoadingManager();
 
     {
+        // =======>Map<======= \\
+
         // const planeSize = 0;
 
         // const loader = new THREE.TextureLoader(manager);
         // const texture = loader.load('./can/1.jpg');
-        // // texture.wrapS = THREE.RepeatWrapping;
-        // // texture.wrapT = THREE.RepeatWrapping;
+        // texture.wrapS = THREE.RepeatWrapping;
+        // texture.wrapT = THREE.RepeatWrapping;
         // texture.magFilter = THREE.NearestFilter;
+        // texture.image = './can/bandothegioi.jpg';
+        // texture.name = 'can';
         // const repeats = planeSize / 2;
         // texture.repeat.set(1, 1, 1);
-
+        // // console.log('texture', texture);
         // const planeGeo = new THREE.PlaneGeometry(1, 1, 1);
+        // const color = new THREE.Color(1, 1, 1);
         // const planeMat = new THREE.MeshPhongMaterial({
+        //     color: color,
         //     map: texture,
         //     side: THREE.DoubleSide,
+        //     emissive: 0XFF0000
         // });
+        // console.log('planMap', planeMat);
         // const mesh = new THREE.Mesh(planeGeo, planeMat);
         // mesh.rotation.x = Math.PI * -.50;
         // scene.add(mesh);
     }
 
     {
-        const skyColor = 0xffffff; // light blue
-        const groundColor = 0xcccccc; // brownish orange
+        const skyColor = 0xffffff;
+        const groundColor = 0xcccccc;
         const intensity = 1;
         const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
         scene.add(light);
@@ -92,36 +108,39 @@ function main() {
 
     {
 
-        function loadModel() {
 
-            gltf.scene.traverse(function(child) {
+        // function loadModel() {
+        //     const gltf = new GLTFLoader(manager);
+        //     gltf.scene.traverse(function(child) {
 
-                if (child.isMesh) child.material.map = texture;
+        //         if (child.isMesh) child.material.map = texture;
 
-            });
+        //     });
+        //     // console.log('texture: ', texture);
+        //     gltf.scene.position.y = -95;
+        //     scene.add(gltf);
+        //     renderer.render(scene, camera);
 
-            gltf.scene.position.y = -95;
-            scene.add(gltf);
-            renderer.render(scene, camera);
+        // }
 
-        }
+        // const manager = new THREE.LoadingManager(loadModel);
 
-        const manager = new THREE.LoadingManager(loadModel);
+        // manager.onProgress = function(item, loaded, total) {
 
-        manager.onProgress = function(item, loaded, total) {
+        //     // console.log('stt: ', loaded, item, total);
 
-            console.log('4->', item);
-
-        };
+        // };
 
         // texture
         // const cvtexture = new THREE.CanvasTexture(canvas);
         const textureLoader = new THREE.TextureLoader(manager);
-        const texture = textureLoader.load('./can/1.jpg');
+        const texture = textureLoader.load('./can/can.gltf');
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
+        texture.image = './can/1.jpg';
+        texture.name = 'lon-bia';
         texture.repeat.set(4, 4);
-
+        console.log(textureLoader);
         // model
 
         function onProgress(xhr) {
@@ -129,23 +148,21 @@ function main() {
             if (xhr.lengthComputable) {
 
                 const percentComplete = xhr.loaded / xhr.total * 100;
-                console.log('model ' + Math.round(percentComplete, 2) + '% downloaded');
+                // console.log('model ' + Math.round(percentComplete, 2) + '% downloaded');
 
             }
 
         }
 
-        function onError() {}
-        const loader = new GLTFLoader(manager);
-        loader.load('./can/can.gltf', function(gltfload) {
+        function onError() {
 
-            gltf = gltfload;
-
-        }, onProgress, onError);
+        }
 
         const gltfLoader = new GLTFLoader(manager);
-        gltfLoader.load('./can/can.gltf', (gltf) => {
-            const root = gltf.scene;
+        gltfLoader.load('./can/can.gltf', (image) => {
+            const texture = new THREE.CanvasTexture(image);
+            const root = image.scene;
+            // console.log(texture);
             scene.add(root);
 
             // compute the box that contains all the stuff
@@ -162,7 +179,7 @@ function main() {
             controls.maxDistance = boxSize * 20;
             controls.target.copy(boxCenter);
             controls.update();
-        });
+        }, onProgress, onError);
     }
 
     function resizeRendererToDisplaySize(renderer) {
@@ -193,3 +210,134 @@ function main() {
 }
 
 main();
+
+
+// ==============================================
+
+// let camera, scene, renderer;
+// let group, cubes;
+
+// init();
+// animate();
+
+// function addImageBitmap() {
+
+//     new THREE.ImageBitmapLoader()
+//         .setOptions({ imageOrientation: 'none' })
+//         .load('./can/1.png?', function(imageBitmap) {
+
+//             const texture = new THREE.CanvasTexture(imageBitmap);
+//             const material = new THREE.MeshBasicMaterial({ map: texture });
+
+//             /* ImageBitmap should be disposed when done with it
+//                Can't be done until it's actually uploaded to WebGLTexture */
+
+//             // imageBitmap.close();
+
+//             addCube(material);
+
+//         }, function(p) {
+//             console.log(p);
+
+//         }, function(e) {
+
+//             console.log(e);
+
+//         });
+
+// }
+
+// function addImage() {
+
+//     new THREE.ImageLoader()
+//         .setCrossOrigin('*')
+//         .load('./can/1.jpg', function(image) {
+//             const texture = new THREE.CanvasTexture(image);
+//             console.log(texture);
+//             const material = new THREE.MeshBasicMaterial({
+//                 color: 0xffffff,
+//                 map: texture
+//             });
+
+//             addCube(material);
+
+
+
+//         });
+
+
+
+// }
+
+
+
+// const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+// function addCube(material) {
+
+//     const cube = new THREE.Mesh(geometry, material);
+//     cube.position.set(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+//     cube.rotation.set(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI);
+//     cubes.add(cube);
+
+// }
+
+// function init() {
+
+//     const container = document.createElement('div');
+//     document.body.appendChild(container);
+
+
+//     // CAMERA
+
+//     camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1500);
+//     camera.position.set(0, 4, 7);
+//     camera.lookAt(0, 0, 0);
+
+//     // SCENE
+
+//     scene = new THREE.Scene();
+
+//     //
+
+//     group = new THREE.Group();
+//     scene.add(group);
+
+//     cubes = new THREE.Group();
+//     group.add(cubes);
+
+//     // RENDERER
+
+//     renderer = new THREE.WebGLRenderer({ antialias: true });
+//     renderer.setPixelRatio(window.devicePixelRatio);
+//     renderer.setSize(window.innerWidth, window.innerHeight);
+//     container.appendChild(renderer.domElement);
+
+//     // TESTS
+
+//     // setTimeout(addImage, 300);
+//     addImage();
+//     // EVENTS
+
+//     window.addEventListener('resize', onWindowResize);
+
+// }
+
+// function onWindowResize() {
+
+//     camera.aspect = window.innerWidth / window.innerHeight;
+//     camera.updateProjectionMatrix();
+
+//     renderer.setSize(window.innerWidth, window.innerHeight);
+
+// }
+
+// function animate() {
+
+//     group.rotation.y = performance.now() / 3000;
+
+//     renderer.render(scene, camera);
+
+//     requestAnimationFrame(animate);
+
+// }
