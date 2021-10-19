@@ -43,10 +43,9 @@ function init() {
     manager.setURLModifier((url) => {
         url = URL.createObjectURL(blobs[url]);
         objectUrls.push(url);
+        console.log(url);
         return url;
     });
-
-
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
