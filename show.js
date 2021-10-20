@@ -11,14 +11,13 @@ init();
 animate();
 
 function addImageBitmap() {
-
     new THREE.ImageBitmapLoader()
         .setOptions({ imageOrientation: 'none' })
         .load('./can/bandothegioi.jpg', function(imageBitmap) {
 
             const texture = new THREE.CanvasTexture(imageBitmap);
             const material = new THREE.MeshBasicMaterial({ map: texture });
-
+            console.log(texture.image);
             /* ImageBitmap should be disposed when done with it
                Can't be done until it's actually uploaded to WebGLTexture */
 

@@ -109,38 +109,80 @@ function main() {
     {
 
 
-        // function loadModel() {
-        //     const gltf = new GLTFLoader(manager);
-        //     gltf.scene.traverse(function(child) {
+        function loadModel() {
+            const gltfLoad = new GLTFLoader();
+            gltfLoad.load('./can/can.gltf', function(gltf) {
+                gltf.scene.traverse(function(child) {
+                    if (child.isMesh) {
+                        child.material.envMap;
+                    }
+                });
+                scene.add(gltf.scene);
+                console.log('object');
+                gltf.scene.position.y = -95;
+                scene.add(gltf.scene);
+                renderer.render(scene, camera);
+                console.log(gltfLoad)
+            });
 
-        //         if (child.isMesh) child.material.map = texture;
+        }
 
-        //     });
-        //     // console.log('texture: ', texture);
-        //     gltf.scene.position.y = -95;
-        //     scene.add(gltf);
-        //     renderer.render(scene, camera);
+        function addImageBitmap() {
+            new THREE.ImageBitmapLoader()
+                .setOptions({ imageOrientation: 'none' })
+                .load('./can/bandothegioi.jpg', function(imageBitmap) {
 
-        // }
+                    const texture = new THREE.CanvasTexture(imageBitmap);
+                    const material = new THREE.MeshPhongMaterial({
+                        map: texture,
+                        transparent: true,
+                        aoMap: 1,
+                        alphaMap: 'white',
+                        emissive: 150,
+                        lightMap: 1
 
-        // const manager = new THREE.LoadingManager(loadModel);
+                    });
+                    console.log(material);
+                    /* ImageBitmap should be disposed when done with it
+                       Can't be done until it's actually uploaded to WebGLTexture */
 
-        // manager.onProgress = function(item, loaded, total) {
+                    // imageBitmap.close();
 
-        //     // console.log('stt: ', loaded, item, total);
+                    addCube(material);
 
-        // };
+                }, function(p) {
+
+                    console.log(p);
+
+                }, function(e) {
+
+                    console.log(e);
+
+                });
+
+        }
+
+
+        const manager = new THREE.LoadingManager(addImageBitmap);
+
+        manager.onProgress = function(item, loaded, total) {
+
+            // console.log('stt: ', loaded, item, total);
+
+        };
 
         // texture
         // const cvtexture = new THREE.CanvasTexture(canvas);
-        const textureLoader = new THREE.TextureLoader(manager);
-        const texture = textureLoader.load('./can/can.gltf');
+        const texture = new THREE.TextureLoader().load(
+            './can/can.gltf'
+        );
+        const material = new THREE.MeshBasicMaterial({ map: texture })
+
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.image = './can/1.jpg';
         texture.name = 'lon-bia';
         texture.repeat.set(4, 4);
-        console.log(textureLoader);
         // model
 
         function onProgress(xhr) {
