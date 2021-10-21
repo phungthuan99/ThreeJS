@@ -15,25 +15,27 @@ function addImageBitmap() {
         .setOptions({ imageOrientation: 'none' })
         .load('./can/bandothegioi.jpg', function(imageBitmap) {
 
-            const texture = new THREE.CanvasTexture(imageBitmap);
-            const material = new THREE.MeshBasicMaterial({ map: texture });
-            console.log(texture.image);
-            /* ImageBitmap should be disposed when done with it
-               Can't be done until it's actually uploaded to WebGLTexture */
+                const texture = new THREE.CanvasTexture(imageBitmap);
+                const material = new THREE.MeshBasicMaterial({ map: texture });
+                console.log('texture', texture);
+                /* ImageBitmap should be disposed when done with it
+                   Can't be done until it's actually uploaded to WebGLTexture */
 
-            // imageBitmap.close();
+                // imageBitmap.close();
 
-            addCube(material);
+                addCube(material);
 
-        }, function(p) {
+            },
+            function(p) {
 
-            console.log(p);
+                console.log(p);
 
-        }, function(e) {
+            },
+            function(e) {
 
-            console.log(e);
+                console.log(e);
 
-        });
+            });
 
 }
 addImageBitmap();
@@ -51,6 +53,7 @@ function addImage() {
 }
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
+console.log('geometry', geometry)
 
 function addCube(material) {
 
