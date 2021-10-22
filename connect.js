@@ -4,38 +4,35 @@ import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
 import { ObjectLoader } from './three/build/three.module.js';
 import { DRACOLoader } from './three/examples/jsm/loaders/DRACOLoader.js';
 
-let gltf, cubes;
+let gltf, cubes, material, texture_material;
 
 function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({ canvas });
-    canvas.addEventListener('mousedown', () => {
+    canvas.addEventListener('mousedown', (e) => {
+        // console.log(e.clientX, e.clientY);
         canvas.style.cursor = 'grabbing';
     });
-    canvas.addEventListener('mouseup', () => {
+    canvas.addEventListener('mouseup', (e) => {
         canvas.style.cursor = 'grab';
     });
-    canvas.addEventListener('mouseover', () => {
+    canvas.addEventListener('mouseover', (e) => {
         canvas.style.cursor = 'grab';
-    })
+    });
     const camera = new THREE.PerspectiveCamera(
         75,
         window.innerWidth / window.innerHeight,
         1,
         1000
     );
-    camera.position.x = 1;
     camera.position.set(1, 0, 1);
-
     const controls = new OrbitControls(camera, canvas);
     controls.target.set(1, 1, 1);
     controls.update();
-
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#F6F6F6');
     const manager = new THREE.LoadingManager();
     // console.log('manager', manager);
-
     {
         const skyColor = 0xffffff;
         const groundColor = 0xffffff;
@@ -51,7 +48,6 @@ function main() {
         scene.add(light);
     }
 
-
     function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
         const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
         const halfFovY = THREE.MathUtils.degToRad(camera.fov * .5);
@@ -60,11 +56,9 @@ function main() {
         // in the xz plane from the center of the box
         const direction = (new THREE.Vector3())
             .subVectors(camera.position, boxCenter)
-            .multiply(new THREE.Vector3(1, 1, 1))
+            .multiply(new THREE.Vector3(0, 0, 1))
             .normalize();
-
         camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
-
         camera.near = boxSize / 100;
         camera.far = boxSize * 100;
         camera.updateProjectionMatrix();
@@ -73,110 +67,66 @@ function main() {
     }
 
     {
-        function addImageBitmap() {
-            const pictureImage = new THREE.ImageBitmapLoader();
-            pictureImage.setOptions({ imageOrientation: 'flipY' })
-                .load('./can/bandothegioi.jpg', function(imageBitmap) {
-                    const texture = new THREE.CanvasTexture(imageBitmap);
-                    const material = new THREE.MeshPhongMaterial({
-                        map: texture,
-                        color: 0x00ffff,
-                        emissive: 0xffffff
-                    });
-                    addCube(material);
-                }, function(p) {
-                    console.log('Process: ', p);
-                }, function(e) {
-                    console.log('Errors: ', e);
-                });
-
-        }
-
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-
-        function addCube(material) {
-            const mesh = new THREE.Mesh(geometry, material);
-            scene.add(mesh);
-        }
-
-
-
-        const manager = new THREE.LoadingManager(addImageBitmap);
-
-        manager.onProgress = function(item, loaded, total) {
-
-            // console.log('stt: ', loaded, item, total);
-
-        };
-
         function onProgress(xhr) {
-
             if (xhr.lengthComputable) {
 
                 const percentComplete = xhr.loaded / xhr.total * 100;
                 // console.log('model ' + Math.round(percentComplete, 2) + '% downloaded');
-
             }
-
         }
 
         function onError(e) {
-            console.log(e)
-        }
-
-        new GLTFLoader(manager)
-            .load('./can/can.gltf', (image) => {
-                const texture = new THREE.CanvasTexture(image);
-                // console.log('image', image);
-                const root = image.scene;
-                // console.log('extured', texture);
-                scene.add(root);
-
-                // compute the box that contains all the stuff
-                // from root and below
-                const box = new THREE.Box3().setFromObject(root);
-
-                const boxSize = box.getSize(new THREE.Vector3()).length();
-                const boxCenter = box.getCenter(new THREE.Vector3());
-
-                // set the camera to frame the box
-                frameArea(boxSize * 2, boxSize, boxCenter, camera);
-
-                // update the Trackball controls to handle the new size
-                controls.maxDistance = boxSize * 20;
-                controls.target.copy(boxCenter);
-                controls.update();
-            }, onProgress, onError);
+            // console.log('Error', e)
+        };
+        const loading = new GLTFLoader();
+        loading.load('./can/can.gltf', (gltf) => {
+            const textureLoader = new THREE.TextureLoader(manager);
+            const texture = textureLoader.load('./can/bcc.jpg');
+            // console.log(texture);
+            const root = gltf.scene;
+            scene.add(root);
+            root.traverse((obj) => {
+                if (obj.isMesh) {
+                    let textureImg = obj,
+                        material_c = textureImg.material;
+                    material_c.map = texture;
+                    console.log('debug', material_c);
+                    let material_n = new THREE.MeshPhongMaterial({
+                        color: 0x999999,
+                        map: material_c.map,
+                        transparent: true
+                    });
+                    texture_material = material_n;
+                    texture_material.needsUpdate = true;
+                    textureImg.material = material_n;
+                }
+            });
+            root.updateMatrixWorld();
+            const box = new THREE.Box3().setFromObject(root);
+            const boxSize = box.getSize(new THREE.Vector3()).length();
+            const boxCenter = box.getCenter(new THREE.Vector3());
+            frameArea(boxSize * 2, boxSize, boxCenter, camera);
+            controls.maxDistance = boxSize * 20;
+            controls.target.copy(boxCenter);
+            controls.update();
+        }, onProgress, onError);
     }
     const loading = new GLTFLoader();
     const model = new THREE.Object3D();
     const url = './can/can.gltf';
     loading.load(url, (gltf) => {
             gltf.scene = model;
+            // console.log(model)
             model.name = 'model';
             scene.add(model);
             model.position.set(1, 1, 1);
-            console.log('DumpObject 👉🏿 ', dumpObject(model).join('\n'));
         },
         function(e) {
-            console.log(e)
+            // console.log('onProcess', e)
         },
         function(e) {
-            console.log(e)
+            // console.log('onError', e)
         });
-
-
-    function dumpObject(obj, lines = [], isLast = true, prefix = '') {
-        const localPrefix = isLast ? '└─' : '├─';
-        lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`);
-        const newPrefix = prefix + (isLast ? '  ' : '│ ');
-        const lastNdx = obj.children.length - 1;
-        obj.children.forEach((child, ndx) => {
-            const isLast = ndx === lastNdx;
-            dumpObject(child, lines, isLast, newPrefix);
-        });
-        return lines;
-    }
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
