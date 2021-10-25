@@ -80,11 +80,13 @@ function main() {
             // const cvan = document.querySelector('#here-canvas');
             // console.log(cvan);
             const image_img = window.frames[0].canvas.toDataURL('image/png', 1);
-            console.log(image_img);
+            // console.log(image_img);
             const loading = new GLTFLoader();
             loading.load('./can/can.gltf', (gltf) => {
                 const textureLoader = new THREE.TextureLoader();
                 const texture = textureLoader.load(image_img);
+                texture.image = image_img;
+                // console.log(texture)
                 texture.flipY = false;
                 const root = gltf.scene;
                 scene.add(root);
@@ -98,9 +100,9 @@ function main() {
                             let material_n = new THREE.MeshPhongMaterial({
                                 color: 0x999999,
                                 map: material_c.map,
-                                transparent: true
+                                transparent: 0xffffff
                             });
-
+                            console.log(material_n);
                             texture_material = material_n;
                             texture_material.needsUpdate = true;
                             textureImg.material = material_n;
