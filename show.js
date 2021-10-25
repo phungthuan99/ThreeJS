@@ -1,6 +1,6 @@
-import * as THREE from './three/build/three.module.js';
-import { GLTFLoader } from './three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
+import * as THREE from './assets/JS/three.module.js';
+import { GLTFLoader } from './assets/JS/GLTFLoader.js';
+import { OrbitControls } from './assets/JS/OrbitControls.js';
 
 
 
@@ -15,6 +15,7 @@ function addImageBitmap() {
         .load('./can/bandothegioi.jpg', function(imageBitmap) {
                 const texture = new THREE.CanvasTexture(imageBitmap);
                 const material = new THREE.MeshBasicMaterial({ map: texture });
+                texture.flipY = true;
                 console.log('texture', texture);
                 /* ImageBitmap should be disposed when done with it
                     Can't be done until it's actually uploaded to WebGLTexture */

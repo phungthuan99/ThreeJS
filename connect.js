@@ -6,15 +6,8 @@ let texture_material, image_img;
 
 function main() {
     const canvas = document.querySelector('#c');
-    const _click = document.querySelector('#click');
-    _click.addEventListener('click', changeImage, false);
 
-    function changeImage(e) {
-        const chk = new PointerEvent(changeImage);
-        console.log('ba', chk);
-        const url = './can/circle.png';
-        return url;
-    }
+
     const renderer = new THREE.WebGLRenderer({ canvas });
     canvas.addEventListener('mousedown', (e) => {
 
@@ -83,42 +76,47 @@ function main() {
         function onError(e) {
 
         };
-        const loading = new GLTFLoader();
-        image_img = './can/circle.png';
-        loading.load('./can/can.gltf', (gltf) => {
-            const textureLoader = new THREE.TextureLoader();
-            const texture = textureLoader.load(image_img);
-            texture.flipY = false;
-            const root = gltf.scene;
-            scene.add(root);
-            root.rotation.set(0, 1.5, 0);
-            root.traverse((obj) => {
-                if (obj.isMesh) {
-                    if (obj.name == 'label') {
-                        let textureImg = obj,
-                            material_c = textureImg.material;
-                        material_c.map = texture;
-                        let material_n = new THREE.MeshPhongMaterial({
-                            color: 0x999999,
-                            map: material_c.map,
-                            transparent: true
-                        });
+        document.querySelector('#click').addEventListener('click', function() {
+            // const cvan = document.querySelector('#here-canvas');
+            // console.log(cvan);
+            const image_img = window.frames[0].canvas.toDataURL('image/png', 1);
+            console.log(image_img);
+            const loading = new GLTFLoader();
+            loading.load('./can/can.gltf', (gltf) => {
+                const textureLoader = new THREE.TextureLoader();
+                const texture = textureLoader.load(image_img);
+                texture.flipY = false;
+                const root = gltf.scene;
+                scene.add(root);
+                root.rotation.set(0, 1.5, 0);
+                root.traverse((obj) => {
+                    if (obj.isMesh) {
+                        if (obj.name == 'label') {
+                            let textureImg = obj,
+                                material_c = textureImg.material;
+                            material_c.map = texture;
+                            let material_n = new THREE.MeshPhongMaterial({
+                                color: 0x999999,
+                                map: material_c.map,
+                                transparent: true
+                            });
 
-                        texture_material = material_n;
-                        texture_material.needsUpdate = true;
-                        textureImg.material = material_n;
+                            texture_material = material_n;
+                            texture_material.needsUpdate = true;
+                            textureImg.material = material_n;
+                        }
                     }
-                }
-            });
-            root.updateMatrixWorld();
-            const box = new THREE.Box3().setFromObject(root);
-            const boxSize = box.getSize(new THREE.Vector3()).length();
-            const boxCenter = box.getCenter(new THREE.Vector3());
-            frameArea(boxSize * 2, boxSize, boxCenter, camera);
-            controls.maxDistance = boxSize * 20;
-            controls.target.copy(boxCenter);
-            controls.update();
-        }, onProgress, onError);
+                });
+                root.updateMatrixWorld();
+                const box = new THREE.Box3().setFromObject(root);
+                const boxSize = box.getSize(new THREE.Vector3()).length();
+                const boxCenter = box.getCenter(new THREE.Vector3());
+                frameArea(boxSize * 2, boxSize, boxCenter, camera);
+                controls.maxDistance = boxSize * 20;
+                controls.target.copy(boxCenter);
+                controls.update();
+            }, onProgress, onError);
+        });
     }
 
     function resizeRendererToDisplaySize(renderer) {
