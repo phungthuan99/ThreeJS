@@ -12,32 +12,61 @@
         margin: 0;
         padding: 0;
     }
+    
+    canvas {
+        display: block;
+    }
+    
+    body {
+        background: black;
+    }
 </style>
 
 <body>
-    <canvas id="canvas" style="width:100%;height:10%;margin:auto;"></canvas>
+    <canvas id="canvas" style="width:600px;height:300px;margin:auto;"></canvas>
 </body>
 <script>
-    var c = document.getElementById("canvas");
-    var ctx = c.getContext("2d");
+    var c = document.getElementById('canvas');
+    var cxt = c.getContext("2d");
 
-    ctx.beginPath();
-    ctx.moveTo(100, 0);
-    ctx.lineTo(100, 300);
-    ctx.stroke();
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
 
-    function drawCircle(x) {
-        ctx.beginPath();
-        ctx.arc(x, 100, 10, 0, 2 * Math.PI);
-        ctx.fillStyle = "red";
-        ctx.fill();
+
+
+    var chinese = "1001101001100110 1011010101101100 0010011110010001 0110001111010001";
+    chinese = chinese.split("");
+
+    var font_size = 10;
+    var columns = c.width / font_size;
+
+    var drops = [];
+
+    for (var x = 0; x < columns; x++) {
+        drops[x] = 1;
     }
-    var x = 0;
-    setInterval(function() {
-        ctx.clearRect(0, 0, 300, 300);
-        drawCircle(x % 300);
-        x++;
-    }, 25);
+
+    function draw() {
+        cxt.fillStyle = "rgba(0,0,0,0.05)";
+        cxt.fillRect(0, 0, c.width, c.height);
+
+        cxt.fillStyle = "#0F0";
+        cxt.font = font_size + 'px arial';
+
+
+        for (var i = 0; i < drops.length; i++) {
+            var text = chinese[Math.floor(Math.random() * chinese.length)];
+            cxt.fillText(text, i * font_size, drops[i] * font_size);
+
+            if (drops[i] * font_size > c.height && Math.random() > 0.975)
+                drops[i] = 0;
+
+            //increment y coordinate
+            drops[i]++;
+        }
+
+    }
+    setInterval(draw, 40);
 </script>
 
 </html>
