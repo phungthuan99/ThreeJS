@@ -6,6 +6,10 @@ import { OBJLoader } from './assets/JS/OBJLoader.js'
 let texture_material;
 
 function main() {
+    let mouseX,
+        mouseY,
+        windowHalfX,
+        windowHalfY
     const canvas = document.querySelector('#c');
 
     const renderer = new THREE.WebGLRenderer({ canvas });
@@ -23,21 +27,22 @@ function main() {
     });
 
     const camera = new THREE.PerspectiveCamera(
-        70,
+        75,
         window.innerWidth / window.innerHeight,
-        1,
-        2000
+        0.05,
+        1500
     );
-
+    camera.position.set(0.2, 1, 0);
+    // console.log('cam', camera)
     const controls = new OrbitControls(camera, canvas);
     controls.target.set(1, 1, 1);
     controls.update();
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#F6F6F6');
+    scene.background = new THREE.Color('#000018');
 
     {
-        const skyColor = 0xffffff;
-        const groundColor = 0xffffff;
+        const skyColor = 0x000000;
+        const groundColor = 0xfefefe;
         const intensity = 1;
         const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
         scene.add(light);
@@ -69,28 +74,59 @@ function main() {
         }
         const textureLoader = new THREE.TextureLoader(manager);
         const texture = textureLoader.load(image);
+        texture.flipY = true;
+        texture.repeat.set(1, 1);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.center = {
+            x: 1.7,
+            y: 1.7
+        }
+        texture.repeat = {
+            x: 1.5,
+            y: 1.5
+        }
+        texture.isRenderTargetTexture = true;
+        texture.premultiplyAlpha = true;
+        // console.log('texture ', texture)
 
         function loadModel() {
-
             object.traverse(function(child) {
-
                 if (child.isMesh) {
-                    console.log(child)
-                    child.material.map = texture;
-                }
+                    child.material.color = {
+                        r: 0.5,
+                        g: 0.5,
+                        b: 0.5
+                    };
+                    if (child.material) {
+                        child.scale.set(1, 1, 1);
+                        child.position.set(0, 1.5, 1);
 
+                        function onRotationChange() {
+                            console.log(1);
+                        }
+                        child.material.map = texture;
+                    }
+                    if (child instanceof THREE.Mesh) {
+                        console.log(object)
+                    }
+                }
             });
 
-            object.position.y = -95;
             scene.add(object);
 
         }
         const loader = new OBJLoader(manager);
         loader.load(url_obj, function(obj) {
             object = obj;
+            object.rotation.set(0, 0.8, 0);
         }, onProgress, onError);
 
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
     }
+
 
     function loadingGLTFModel(object, image) {
         const loading = new GLTFLoader();
@@ -99,25 +135,42 @@ function main() {
             const texture = textureLoader.load(image);
             texture.image = image;
             texture.flipY = false;
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.center = {
+                x: 0.5,
+                y: 0.5
+            }
+            texture.repeat = {
+                x: 1.1,
+                y: 1.1
+            }
             const root = gltf.scene;
             scene.add(root);
             root.rotation.set(0, 1.5, 0);
             root.traverse((obj) => {
                 if (obj.isMesh) {
                     if (obj.name == 'label') {
+                        console.log('ok')
                         let textureImg = obj,
                             material_c = textureImg.material;
                         material_c.map = texture;
                         let material_n = new THREE.MeshPhongMaterial({
-                            color: 0xfcfcfc,
+                            color: 0x606060,
+                            opacity: 1,
                             map: texture,
-                            transparent: 0xffffff
+                            transparent: 0xffffff,
+                            emissive: 0x000000
                         });
+                        const light = new THREE.HemisphereLight(0xffffff, 0xfefefe, 1);
+                        scene.add(light);
+                        // console.log(material_n)
                         texture_material = material_n;
                         texture_material.needsUpdate = true;
                         textureImg.material = material_n;
                     }
                     if (obj.name == 'MeshPhongMasterial') {
+                        console.log('no')
                         texture.flipY = false;
                         let textureImg = obj,
                             material_c = textureImg.material;
@@ -149,17 +202,20 @@ function main() {
         const tmp_name = file_name.substring(file_name.lastIndexOf('.'));
         const image_img = window.frames[0].canvas.toDataURL('image/png', 1);
         if (tmp_name == '.obj') {
-            loadingObjectModel(url_obj, image_img);
+            loadingObjectModel(url_obj, './can/dc.jpg');
+            console.log(tmp_name);
         }
 
         if (tmp_name == '.gltf') {
-            loadingGLTFModel(url_obj, image_img);
+            loadingGLTFModel(url_obj, './can/dc.jpg');
+            console.log(tmp_name);
         }
 
     }
-
     document.querySelector('#click').addEventListener('click', function() {
-        loading3DModel('./can/shirt-2.obj');
+        const open = document.querySelector('.hidden');
+        open.style.display = 'inline';
+        loading3DModel('./can/shirt-3.obj');
     });
 
     function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
@@ -170,7 +226,6 @@ function main() {
             .subVectors(camera.position, boxCenter)
             .multiply(new THREE.Vector3(0, 0, 1))
             .normalize();
-
         camera.position.copy(direction.multiplyScalar(distance).add(boxCenter));
         camera.near = boxSize / 100;
         camera.far = boxSize * 100;
