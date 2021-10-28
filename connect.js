@@ -27,13 +27,12 @@ function main() {
     });
 
     const camera = new THREE.PerspectiveCamera(
-        75,
+        45,
         window.innerWidth / window.innerHeight,
-        0.05,
-        1500
+        1,
+        1000
     );
     camera.position.set(0.2, 1, 0);
-    // console.log('cam', camera)
     const controls = new OrbitControls(camera, canvas);
     controls.target.set(1, 1, 1);
     controls.update();
@@ -64,16 +63,16 @@ function main() {
         const manager = new THREE.LoadingManager(loadModel);
         manager.onProgress = function(item, loaded, total) {};
 
-        function onError() {}
+        function onError() {};
 
         function onProgress(xhr) {
             if (xhr.lengthComputable) {
                 const percentComplete = xhr.loaded / xhr.total * 100;
                 console.log('model ' + Math.round(percentComplete, 2) + '% downloaded');
             }
-        }
+        };
         const textureLoader = new THREE.TextureLoader(manager);
-        const texture = textureLoader.load(image);
+        const texture = textureLoader.load(design);
         texture.flipY = true;
         texture.repeat.set(1, 1);
         texture.wrapS = THREE.RepeatWrapping;
@@ -81,18 +80,17 @@ function main() {
         texture.center = {
             x: 1.7,
             y: 1.7
-        }
+        };
         texture.repeat = {
             x: 1.5,
             y: 1.5
-        }
-        texture.isRenderTargetTexture = true;
-        texture.premultiplyAlpha = true;
-        // console.log('texture ', texture)
+        };
 
         function loadModel() {
             object.traverse(function(child) {
                 if (child.isMesh) {
+                    console.log('obj', child)
+                    child.visible = !0;
                     child.material.color = {
                         r: 0.5,
                         g: 0.5,
@@ -101,30 +99,32 @@ function main() {
                     if (child.material) {
                         child.scale.set(1, 1, 1);
                         child.position.set(0, 1.5, 1);
+                        child.rotation.set(0, 3, 0);
 
-                        function onRotationChange() {
-                            console.log(1);
-                        }
+                        function onRotationChange() {}
                         child.material.map = texture;
+                        child.materialLibraries = null;
                     }
-                    if (child instanceof THREE.Mesh) {
-                        console.log(object)
-                    }
+                    if (child instanceof THREE.Mesh) {}
                 }
             });
 
             scene.add(object);
-
+            object.updateMatrixWorld();
+            const box = new THREE.Box3().setFromObject(object);
+            const boxSize = box.getSize(new THREE.Vector3()).length();
+            const boxCenter = box.getCenter(new THREE.Vector3());
+            frameArea(boxSize * 2, boxSize, boxCenter, camera);
+            controls.maxDistance = boxSize * 20;
+            controls.target.copy(boxCenter);
+            controls.update();
         }
+
         const loader = new OBJLoader(manager);
         loader.load(url_obj, function(obj) {
             object = obj;
-            object.rotation.set(0, 0.8, 0);
         }, onProgress, onError);
 
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
 
@@ -150,8 +150,9 @@ function main() {
             root.rotation.set(0, 1.5, 0);
             root.traverse((obj) => {
                 if (obj.isMesh) {
+                    console.log(obj)
                     if (obj.name == 'label') {
-                        console.log('ok')
+                        console.log('label')
                         let textureImg = obj,
                             material_c = textureImg.material;
                         material_c.map = texture;
@@ -164,13 +165,12 @@ function main() {
                         });
                         const light = new THREE.HemisphereLight(0xffffff, 0xfefefe, 1);
                         scene.add(light);
-                        // console.log(material_n)
                         texture_material = material_n;
                         texture_material.needsUpdate = true;
                         textureImg.material = material_n;
                     }
                     if (obj.name == 'MeshPhongMasterial') {
-                        console.log('no')
+                        console.log('meshphongmaterial')
                         texture.flipY = false;
                         let textureImg = obj,
                             material_c = textureImg.material;
@@ -212,11 +212,11 @@ function main() {
         }
 
     }
-    document.querySelector('#click').addEventListener('click', function() {
-        const open = document.querySelector('.hidden');
-        open.style.display = 'inline';
-        loading3DModel('./can/shirt-3.obj');
-    });
+    // document.querySelector('#click').addEventListener('click', function() {
+    const open = document.querySelector('.hidden');
+    open.style.display = 'inline';
+    loading3DModel('./can/shirt.obj');
+    // });
 
     function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
         const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;

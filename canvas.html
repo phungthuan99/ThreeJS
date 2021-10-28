@@ -34,7 +34,7 @@
 
 
 
-    var chinese = 'O';
+    var chinese = '!';
     chinese = chinese.split("");
 
     var font_size = 10;
@@ -50,7 +50,7 @@
         cxt.fillStyle = "rgba(0,0,0,0.05)";
         cxt.fillRect(0, 0, c.width, c.height);
 
-        cxt.fillStyle = "#0F0";
+        cxt.fillStyle = "#bdeeff";
         cxt.font = font_size + 'px arial';
 
 
@@ -58,7 +58,7 @@
             var text = chinese[Math.floor(Math.random() * chinese.length)];
             cxt.fillText(text, i * font_size, drops[i] * font_size);
 
-            if (drops[i] * font_size > c.height && Math.random() > 0.975)
+            if (drops[i] * font_size > c.height && Math.random() > 0.955)
                 drops[i] = 0;
 
             //increment y coordinate
