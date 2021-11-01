@@ -72,7 +72,7 @@ function main() {
             }
         };
         const textureLoader = new THREE.TextureLoader(manager);
-        const texture = textureLoader.load(design);
+        const texture = textureLoader.load(image);
         texture.flipY = true;
         texture.repeat.set(1, 1);
         texture.wrapS = THREE.RepeatWrapping;
