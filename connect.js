@@ -37,7 +37,7 @@ function main() {
     controls.target.set(1, 1, 1);
     controls.update();
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#000018');
+    scene.background = new THREE.Color('#ffeeee');
 
     {
         const skyColor = 0x000000;
@@ -202,21 +202,21 @@ function main() {
         const tmp_name = file_name.substring(file_name.lastIndexOf('.'));
         const image_img = window.frames[0].canvas.toDataURL('image/png', 1);
         if (tmp_name == '.obj') {
-            loadingObjectModel(url_obj, './can/dc.jpg');
+            loadingObjectModel(url_obj, image_img);
             console.log(tmp_name);
         }
 
         if (tmp_name == '.gltf') {
-            loadingGLTFModel(url_obj, './can/dc.jpg');
+            loadingGLTFModel(url_obj, image_img);
             console.log(tmp_name);
         }
 
     }
-    // document.querySelector('#click').addEventListener('click', function() {
-    const open = document.querySelector('.hidden');
-    open.style.display = 'inline';
-    loading3DModel('./can/shirt.obj');
-    // });
+    document.querySelector('#click').addEventListener('click', function() {
+        const open = document.querySelector('.hidden');
+        open.style.display = 'inline';
+        loading3DModel('./can/shirt.obj');
+    });
 
     function frameArea(sizeToFitOnScreen, boxSize, boxCenter, camera) {
         const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
