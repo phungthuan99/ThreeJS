@@ -1,0 +1,11 @@
+ {
+     "index": 1,
+     "visible": true,
+     "selectable": true,
+     "itemId": 1620009440934,
+     "type": "text",
+     "icon_class": "text-fields",
+     "text": "NetBase",
+     "editable": true,
+     "layerName": ""
+ }
